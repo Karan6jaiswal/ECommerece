@@ -227,7 +227,7 @@ print(f"✅ {len(valid_urls)} valid URLs found")
 
 # CSV File Setup
 csv_filename = "jiomart_products.csv"
-with open(csv_filename, "w", newline="", encoding="utf-8") as file:
+with open(csv_filename, "a", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
     writer.writerow(["Name", "Price", "Weight", "URL", "Timestamp"])  # CSV Headers
 
