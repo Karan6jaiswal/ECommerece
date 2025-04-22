@@ -25,7 +25,7 @@ jobs:
 
       - name: execute cutshort_scraper
         working-directory: ./scraper
-        run:|
+        run: |
          python jiomart2.py
          python sig2.py
          python zep2.py
