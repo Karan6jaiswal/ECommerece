@@ -17,14 +17,12 @@ jobs:
           python-version: '3.12'
 
       - name: install python packages
-        working-directory: ./scraper
         run: pip install -r requirements.txt
 
       - name: confirm cron is working
         run: echo "🎉 Cron job is running at $(date)"
 
       - name: execute cutshort_scraper
-        working-directory: ./scraper
         run: |
          python jiomart2.py
          python sig2.py
