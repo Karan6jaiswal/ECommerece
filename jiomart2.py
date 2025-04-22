@@ -204,18 +204,15 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Setup Selenium WebDriver
 options = Options()
-options.add_argument("--headless")  # Always use this in CI
-options.add_argument("--no-sandbox")  # Fixes permission issues in CI
-options.add_argument("--disable-dev-shm-usage")  # Prevents crashing due to limited /dev/shm size
-options.add_argument("--disable-gpu")
 options.add_argument("--disable-blink-features=AutomationControlled")
-
+options.add_argument("--start-maximized")
+options.add_argument("--disable-gpu")
 # options.add_argument("--headless")  # Uncomment for headless mode
 
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # Read CSV File
-review = pd.read_csv(r"C:\Users\admin\Desktop\Python\categories.csv")
+review = pd.read_csv(r"categories.csv")
 
 # Ensure 'jiomart' column exists
 if 'jiomart' not in review.columns:

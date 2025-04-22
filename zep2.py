@@ -403,15 +403,13 @@ print(f"📅 Script Execution Timestamp: {current_timestamp}")
 
 # Set up Selenium WebDriver (Headless)
 options = Options()
-options.add_argument("--headless")  # Always use this in CI
-options.add_argument("--no-sandbox")  # Fixes permission issues in CI
-options.add_argument("--disable-dev-shm-usage")  # Prevents crashing due to limited /dev/shm size
-options.add_argument("--disable-gpu")
+options.add_argument("--headless")  # Run in headless mode (no browser window)
+options.add_argument("--start-maximized")
 options.add_argument("--disable-blink-features=AutomationControlled")  # Avoid bot detection
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # Read Zepto URLs from CSV
-review = pd.read_csv(r"C:\Users\admin\Desktop\Python\categories.csv")
+review = pd.read_csv(r"categories.csv")
 
 # List to store scraped data
 data = []
