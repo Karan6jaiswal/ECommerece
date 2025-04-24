@@ -385,10 +385,119 @@
 
 # print("✅ Data appended to zepto_products.csv")
 # driver.quit()
+# import pandas as pd
+# import os
+# import time
+# from datetime import datetime  # Import datetime for timestamp
+# from selenium import webdriver
+# from selenium.webdriver.common.by import By
+# from selenium.webdriver.chrome.service import Service
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.support.ui import WebDriverWait
+# from selenium.webdriver.support import expected_conditions as EC
+# from webdriver_manager.chrome import ChromeDriverManager
+
+# # Get the current timestamp and print it
+# current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Format: YYYY-MM-DD HH:MM:SS
+# print(f"📅 Script Execution Timestamp: {current_timestamp}")
+
+# # Set up Selenium WebDriver (Headless)
+# options = Options()
+# options.add_argument("--headless")  # Run in headless mode (no browser window)
+# options.add_argument("--start-maximized")
+# options.add_argument("--disable-blink-features=AutomationControlled")  # Avoid bot detection
+# driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+# # Read Zepto URLs from CSV
+# review = pd.read_csv(r"categories.csv")
+
+# # List to store scraped data
+# data = []
+
+# for i in range(len(review)):  
+#     url = review['zepto'][i]
+    
+#     try:
+#         driver.get(url)
+#         WebDriverWait(driver, 10).until(
+#             EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="product-card"]'))
+#         )
+
+#         last_count = 0
+#         scroll_attempts = 0
+#         max_scroll_attempts = 15  # Prevent infinite loops
+
+#         while scroll_attempts < max_scroll_attempts:
+#             product_cards = driver.find_elements(By.CSS_SELECTOR, '[data-testid="product-card"]')
+#             new_count = len(product_cards)
+
+#             if new_count == last_count:  # No new products loaded
+#                 scroll_attempts += 1
+#             else:
+#                 scroll_attempts = 0  # Reset if new products appear
+
+#             last_count = new_count
+
+#             # Use JavaScript for scrolling
+#             driver.execute_script("window.scrollBy(0, 1000);")  # Scroll down
+#             time.sleep(2)  # Give time for products to load
+
+#             try:
+#                 # Click "Load More" button if present
+#                 load_more = driver.find_element(By.XPATH, "//button[contains(text(), 'Load More')]")
+#                 if load_more.is_displayed():
+#                     load_more.click()
+#                     time.sleep(2)  # Allow time for new products to load
+#             except:
+#                 pass  # No "Load More" button, continue scrolling
+
+#         # ✅ Re-fetch product cards AFTER scrolling completes
+#         product_cards = driver.find_elements(By.CSS_SELECTOR, '[data-testid="product-card"]')
+#         print(f"🔍 Total Products Extracted: {len(product_cards)} from URL {i+1}/{len(review)}")
+
+#         # ✅ Extract product details correctly
+#         for product in product_cards:
+#             try:
+#                 name = product.find_element(By.CSS_SELECTOR, '[data-testid="product-card-name"]').text
+#                 price = product.find_element(By.CSS_SELECTOR, '[data-testid="product-card-price"]').text
+#                 try:
+#                     discount = product.find_element(By.CSS_SELECTOR, 'p.absolute.top-0.text-center').text
+#                 except:
+#                     discount = "No Discount"
+#                 try:
+#                     quantity = product.find_element(By.CSS_SELECTOR, '[data-testid="product-card-quantity"]').text
+#                 except:
+#                     quantity = "N/A"  # Default if quantity is missing
+
+#                 # Append product data with quantity included
+#                 data.append([current_timestamp, url, name, price, discount, quantity])
+
+#             except Exception as e:
+#                 print("⚠️ Error extracting product details:", e)
+
+#     except Exception as e:
+#         print(f"❌ Error scraping URL {i+1}/{len(review)}: {e}")
+
+#     print(f"✅ Completed scraping for URL {i+1}/{len(review)}\n")
+
+# # ✅ Save data to CSV with timestamp column
+# df = pd.DataFrame(data, columns=["Timestamp", "URL", "Name", "Price", "Discount", "Quantity"])
+
+# # Define CSV file path
+# csv_file = "zepto_products.csv"
+
+# # Check if the file already exists
+# file_exists = os.path.isfile(csv_file)
+
+# # Append data to CSV (don't write header if file exists)
+# df.to_csv(csv_file, mode="a", index=False, encoding="utf-8", header=not file_exists)
+
+# print("✅ Data successfully appended to zepto_products.csv")
+# driver.quit()
 import pandas as pd
 import os
 import time
-from datetime import datetime  # Import datetime for timestamp
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -397,26 +506,40 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Get the current timestamp and print it
-current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Format: YYYY-MM-DD HH:MM:SS
+# Get current timestamp
+current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 print(f"📅 Script Execution Timestamp: {current_timestamp}")
 
 # Set up Selenium WebDriver (Headless)
 options = Options()
-options.add_argument("--headless")  # Run in headless mode (no browser window)
+options.add_argument("--headless")
 options.add_argument("--start-maximized")
-options.add_argument("--disable-blink-features=AutomationControlled")  # Avoid bot detection
+options.add_argument("--disable-blink-features=AutomationControlled")
+
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # Read Zepto URLs from CSV
-review = pd.read_csv(r"categories.csv")
+try:
+    review = pd.read_csv("categories.csv")
+    if 'zepto' not in review.columns:
+        raise KeyError("Missing 'zepto' column in categories.csv")
+
+    # Filter out invalid/missing URLs
+    review = review[pd.notna(review['zepto']) & review['zepto'].str.startswith('http')].reset_index(drop=True)
+
+except Exception as e:
+    print(f"❌ Error reading 'categories.csv': {e}")
+    driver.quit()
+    exit()
 
 # List to store scraped data
 data = []
 
-for i in range(len(review)):  
+# Scrape each URL
+for i in range(len(review)):
     url = review['zepto'][i]
-    
+    print(f"➡️ Scraping URL {i+1}/{len(review)}: {url}")
+
     try:
         driver.get(url)
         WebDriverWait(driver, 10).until(
@@ -425,37 +548,32 @@ for i in range(len(review)):
 
         last_count = 0
         scroll_attempts = 0
-        max_scroll_attempts = 15  # Prevent infinite loops
+        max_scroll_attempts = 15
 
         while scroll_attempts < max_scroll_attempts:
             product_cards = driver.find_elements(By.CSS_SELECTOR, '[data-testid="product-card"]')
             new_count = len(product_cards)
 
-            if new_count == last_count:  # No new products loaded
+            if new_count == last_count:
                 scroll_attempts += 1
             else:
-                scroll_attempts = 0  # Reset if new products appear
+                scroll_attempts = 0
 
             last_count = new_count
-
-            # Use JavaScript for scrolling
-            driver.execute_script("window.scrollBy(0, 1000);")  # Scroll down
-            time.sleep(2)  # Give time for products to load
+            driver.execute_script("window.scrollBy(0, 1000);")
+            time.sleep(2)
 
             try:
-                # Click "Load More" button if present
                 load_more = driver.find_element(By.XPATH, "//button[contains(text(), 'Load More')]")
                 if load_more.is_displayed():
                     load_more.click()
-                    time.sleep(2)  # Allow time for new products to load
+                    time.sleep(2)
             except:
-                pass  # No "Load More" button, continue scrolling
+                pass
 
-        # ✅ Re-fetch product cards AFTER scrolling completes
         product_cards = driver.find_elements(By.CSS_SELECTOR, '[data-testid="product-card"]')
-        print(f"🔍 Total Products Extracted: {len(product_cards)} from URL {i+1}/{len(review)}")
+        print(f"🔍 Total Products Extracted: {len(product_cards)}")
 
-        # ✅ Extract product details correctly
         for product in product_cards:
             try:
                 name = product.find_element(By.CSS_SELECTOR, '[data-testid="product-card-name"]').text
@@ -467,11 +585,9 @@ for i in range(len(review)):
                 try:
                     quantity = product.find_element(By.CSS_SELECTOR, '[data-testid="product-card-quantity"]').text
                 except:
-                    quantity = "N/A"  # Default if quantity is missing
+                    quantity = "N/A"
 
-                # Append product data with quantity included
                 data.append([current_timestamp, url, name, price, discount, quantity])
-
             except Exception as e:
                 print("⚠️ Error extracting product details:", e)
 
@@ -480,16 +596,10 @@ for i in range(len(review)):
 
     print(f"✅ Completed scraping for URL {i+1}/{len(review)}\n")
 
-# ✅ Save data to CSV with timestamp column
+# Save to CSV
 df = pd.DataFrame(data, columns=["Timestamp", "URL", "Name", "Price", "Discount", "Quantity"])
-
-# Define CSV file path
 csv_file = "zepto_products.csv"
-
-# Check if the file already exists
 file_exists = os.path.isfile(csv_file)
-
-# Append data to CSV (don't write header if file exists)
 df.to_csv(csv_file, mode="a", index=False, encoding="utf-8", header=not file_exists)
 
 print("✅ Data successfully appended to zepto_products.csv")
