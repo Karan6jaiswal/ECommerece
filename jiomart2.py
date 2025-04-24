@@ -212,7 +212,7 @@ options.add_argument("--disable-gpu")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # Read CSV File
-review = pd.read_csv(r"categories.csv")
+review = pd.read_csv("categories.csv")
 
 # Ensure 'jiomart' column exists
 if 'jiomart' not in review.columns:
