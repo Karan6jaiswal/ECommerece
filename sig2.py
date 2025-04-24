@@ -17,7 +17,7 @@ options = Options()
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_argument("--start-maximized")
 options.add_argument("--disable-gpu")
-#options.add_argument("--headless")  # Uncomment for headless mode
+options.add_argument("--headless")  # Uncomment for headless mode
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 # Read Swiggy swiggys from CSV
