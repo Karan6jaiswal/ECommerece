@@ -1,6 +1,5 @@
 import csv
 import time
-import pyautogui
 import pandas as pd
 from datetime import datetime
 from selenium import webdriver
@@ -60,7 +59,8 @@ with open(csv_filename, "a", newline="", encoding="utf-8") as file:
 
             time.sleep(2)  # Allow initial elements to render
             while stagnant_attempts < max_stagnant_attempts:
-                pyautogui.scroll(-10000)  # Scroll down
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
                 time.sleep(3)  # Allow new elements to load
 
                 html = driver.page_source
